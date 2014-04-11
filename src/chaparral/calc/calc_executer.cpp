@@ -9,7 +9,8 @@ CalcExecuter::CalcExecuter(Parser* parser) : Executer(parser) {
 CalcExecuter::~CalcExecuter() {
 }
 
-bool CalcExecuter::ExecuteASTNode(const ASTNode* node, const Variant** var) {
+bool CalcExecuter::ExecuteASTNode(const ASTNode* node,
+                                  shared_ptr<const Variant>* var) {
   DCHECK(node);
   DCHECK(var);
 
@@ -18,10 +19,10 @@ bool CalcExecuter::ExecuteASTNode(const ASTNode* node, const Variant** var) {
       node->token()->IsType(CalcLexer::TYPE_PLUS) ||
       node->token()->IsType(CalcLexer::TYPE_SLASH)) {
     double left = 0;
-    CHECK(ExecuteASTNodeT(node->children()[0], &left));
+    CHECK(ExecuteASTNodeT(node->children()[0].get(), &left));
 
     double right = 0;
-    CHECK(ExecuteASTNodeT(node->children()[1], &right));
+    CHECK(ExecuteASTNodeT(node->children()[1].get(), &right));
 
     double result = 0;
     if (node->token()->IsType(CalcLexer::TYPE_ASTERISK))
@@ -33,15 +34,13 @@ bool CalcExecuter::ExecuteASTNode(const ASTNode* node, const Variant** var) {
     else
       result = left / right;
 
-    scoped_refptr<const Variant> var_ref(new Variant(result));
-    *var = var_ref.Release();
+    var->reset(new Variant(result));
     return true;
   }
 
   if (node->token()->IsType(CalcLexer::TYPE_NUMBER)) {
     double value = atof(node->token()->value().c_str());
-    scoped_refptr<const Variant> var_ref(new Variant(value));
-    *var = var_ref.Release();
+    var->reset(new Variant(value));
     return true;
   }
 

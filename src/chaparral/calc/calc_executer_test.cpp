@@ -9,28 +9,28 @@
 TEST_CASE(CalcExecuterTest) {
  protected:
   void Init(const char* input) {
-    stream_.Reset(new TokenStream(&lexer_, input));
-    parser_.Reset(new CalcParser(stream_.ptr()));
-    executer_.Reset(new CalcExecuter(parser_.ptr()));
+    stream_.reset(new TokenStream(&lexer_, input));
+    parser_.reset(new CalcParser(stream_.get()));
+    executer_.reset(new CalcExecuter(parser_.get()));
   }
 
   CalcLexer lexer_;
-  scoped_ptr<TokenStream> stream_;
-  scoped_ptr<Parser> parser_;
-  scoped_ptr<Executer> executer_;
-  scoped_refptr<const Variant> var_;
+  unique_ptr<TokenStream> stream_;
+  unique_ptr<Parser> parser_;
+  unique_ptr<Executer> executer_;
+  shared_ptr<const Variant> var_;
   double d_;
 };
 
 TEST(CalcExecuterTest, ExecuteEmpty) {
   Init("");
-  EXPECT_FALSE(executer_->Execute(var_.Receive()));
+  EXPECT_FALSE(executer_->Execute(&var_));
   EXPECT_FALSE(executer_->error().empty());
 }
 
 TEST(CalcExecuterTest, ExecuteUnknown) {
   Init("b");
-  EXPECT_FALSE(executer_->Execute(var_.Receive()));
+  EXPECT_FALSE(executer_->Execute(&var_));
   EXPECT_FALSE(executer_->error().empty());
 }
 

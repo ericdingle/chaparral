@@ -10,7 +10,7 @@ TokenStream::TokenStream(const Lexer* lexer, const std::string& input)
 TokenStream::~TokenStream() {
 }
 
-bool TokenStream::GetNextToken(const Token** token) {
+bool TokenStream::GetNextToken(std::unique_ptr<const Token>* token) {
   DCHECK(token);
 
   // Consume the white space.
@@ -31,7 +31,7 @@ bool TokenStream::GetNextToken(const Token** token) {
 
   // If we've reached the end, we return an end of input token.
   if (!HasInput()) {
-    *token = new Token(Lexer::TYPE_END_OF_INPUT, "(end of input)", position_);
+    token->reset(new Token(Lexer::TYPE_END_OF_INPUT, "(end of input)", position_));
     return true;
   }
 
@@ -42,7 +42,7 @@ bool TokenStream::GetNextToken(const Token** token) {
   if (!lexer_->GetToken(input_, index_, &type, &value, &count, &error_))
     return false;
 
-  *token = new Token(type, value, position_);
+  token->reset(new Token(type, value, position_));
 
   // Increment the index and position.
   index_ += count;

@@ -10,7 +10,8 @@ class CalcExecuter : public Executer {
   virtual ~CalcExecuter();
 
  protected:
-  virtual bool ExecuteASTNode(const ASTNode* node, const Variant** var);
+  virtual bool ExecuteASTNode(const ASTNode* node,
+                              shared_ptr<const Variant>* var);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CalcExecuter);

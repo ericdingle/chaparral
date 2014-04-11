@@ -1,14 +1,13 @@
 #ifndef ALTADORE_UTIL_INVOKABLE_H_
 #define ALTADORE_UTIL_INVOKABLE_H_
 
+#include <memory>
 #include <string>
 #include <vector>
-#include "bonavista/memory/ref_counted.h"
-#include "bonavista/memory/scoped_refptr.h"
 
 class Variant;
 
-class Invokable : public RefCounted {
+class Invokable {
  public:
   enum Result {
     RESULT_OK,
@@ -23,8 +22,8 @@ class Invokable : public RefCounted {
 
   virtual Result Invoke(
       const std::string& name,
-      const std::vector<scoped_refptr<const Variant> >& args,
-      const Variant** var) =0;
+      const std::vector<std::shared_ptr<const Variant> >& args,
+      std::shared_ptr<const Variant>* var) =0;
 };
 
 #endif

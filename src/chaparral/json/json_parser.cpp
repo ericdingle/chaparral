@@ -11,44 +11,42 @@ JsonParser::JsonParser(TokenStream* token_stream) : Parser(token_stream) {
 JsonParser::~JsonParser() {
 }
 
-bool JsonParser::Parse(const ASTNode** root) {
+bool JsonParser::Parse(unique_ptr<const ASTNode>* root) {
   DCHECK(root);
 
-  scoped_ptr<const ASTNode> node;
-  if (!Parser::Parse(node.Receive()))
+  unique_ptr<const ASTNode> node;
+  if (!Parser::Parse(&node))
     return false;
-  if (!node.ptr()) {
+  if (!node.get()) {
     error_ = "Input is empty.";
     return false;
   }
 
-  scoped_ptr<const ASTNode> dummy;
-  if (!Parser::Parse(dummy.Receive()) || dummy.ptr()) {
+  unique_ptr<const ASTNode> dummy;
+  if (!Parser::Parse(&dummy) || dummy.get()) {
     error_ = "Encountered more than one expression.";
     return false;
   }
 
-  *root = node.Release();
+  *root = std::move(node);
   return true;
 }
 
-bool JsonParser::ParsePrefixToken(const Token* token, const ASTNode** root) {
-  DCHECK(token);
+bool JsonParser::ParsePrefixToken(unique_ptr<const Token> token,
+                                  unique_ptr<const ASTNode>* root) {
   DCHECK(root);
 
-  scoped_ptr<const Token> token_holder(token);
-
   if (token->IsType(JsonLexer::TYPE_LEFT_BRACE))
-    return ParseObject(token_holder.Release(), root);
+    return ParseObject(std::move(token), root);
   else if (token->IsType(JsonLexer::TYPE_LEFT_BRACKET))
-    return ParseArray(token_holder.Release(), root);
+    return ParseArray(std::move(token), root);
 
   if (token->IsType(JsonLexer::TYPE_FALSE) ||
       token->IsType(JsonLexer::TYPE_NULL) ||
       token->IsType(JsonLexer::TYPE_NUMBER) ||
       token->IsType(JsonLexer::TYPE_STRING) ||
       token->IsType(JsonLexer::TYPE_TRUE)) {
-    *root = new ASTNode(token_holder.Release());
+    root->reset(new ASTNode(std::move(token)));
     return true;
   }
 
@@ -57,40 +55,40 @@ bool JsonParser::ParsePrefixToken(const Token* token, const ASTNode** root) {
   return false;
 }
 
-bool JsonParser::ParseObject(const Token* token, const ASTNode** root) {
+bool JsonParser::ParseObject(unique_ptr<const Token> token,
+                             unique_ptr<const ASTNode>* root) {
   // Implements:
   //  object -> '{' pairs '}'
   //  pair -> string ':' value
   //  pairs -> pair more_pairs | E
   //  more_pairs -> ',' pair more_pairs | E
-  DCHECK(token);
   DCHECK(root);
 
-  scoped_ptr<ASTNode> node(new ASTNode(token));
+  unique_ptr<ASTNode> node(new ASTNode(std::move(token)));
 
   if (!look_ahead_token_->IsType(JsonLexer::TYPE_RIGHT_BRACE)) {
     while (true) {
-      scoped_ptr<const ASTNode> key;
-      if (!ParseExpression(0, key.Receive()))
+      unique_ptr<const ASTNode> key;
+      if (!ParseExpression(0, &key))
         return false;
 
       if (!key->token()->IsType(JsonLexer::TYPE_STRING)) {
-        position_ = token->position();
+        position_ = key->token()->position();
         error_ = StringFormat("Expecting string but found %s",
-                                token->value().c_str());
+                              key->token()->value().c_str());
         return false;
       }
 
-      node->AddChild(key.Release());
+      node->AddChild(std::move(key));
 
       if (!ConsumeToken(JsonLexer::TYPE_COLON))
         return false;
 
-      scoped_ptr<const ASTNode> value;
-      if (!ParseExpression(0, value.Receive()))
+      unique_ptr<const ASTNode> value;
+      if (!ParseExpression(0, &value))
         return false;
 
-      node->AddChild(value.Release());
+      node->AddChild(std::move(value));
 
       if (!look_ahead_token_->IsType(JsonLexer::TYPE_COMMA))
         break;
@@ -102,27 +100,27 @@ bool JsonParser::ParseObject(const Token* token, const ASTNode** root) {
   if (!ConsumeToken(JsonLexer::TYPE_RIGHT_BRACE))
     return false;
 
-  *root = node.Release();
+  *root = std::move(node);
   return true;
 }
 
-bool JsonParser::ParseArray(const Token* token, const ASTNode** root) {
+bool JsonParser::ParseArray(unique_ptr<const Token> token,
+                            unique_ptr<const ASTNode>* root) {
   // Implements:
   //   array -> '[' values ']'
   //   values -> value more_values | E
   //   more_values -> ',' value more_values | E
-  DCHECK(token);
   DCHECK(root);
 
-  scoped_ptr<ASTNode> node(new ASTNode(token));
+  unique_ptr<ASTNode> node(new ASTNode(std::move(token)));
 
   if (!look_ahead_token_->IsType(JsonLexer::TYPE_RIGHT_BRACKET)) {
     while (true) {
-      scoped_ptr<const ASTNode> value;
-      if (!ParseExpression(0, value.Receive()))
+      unique_ptr<const ASTNode> value;
+      if (!ParseExpression(0, &value))
         return false;
 
-      node->AddChild(value.Release());
+      node->AddChild(std::move(value));
 
       if (!look_ahead_token_->IsType(JsonLexer::TYPE_COMMA))
         break;
@@ -134,6 +132,6 @@ bool JsonParser::ParseArray(const Token* token, const ASTNode** root) {
   if (!ConsumeToken(JsonLexer::TYPE_RIGHT_BRACKET))
     return false;
 
-  *root = node.Release();
+  *root = std::move(node);
   return true;
 }

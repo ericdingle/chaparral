@@ -1,23 +1,24 @@
 #ifndef CHAPARRAL_EXECUTER_VARIANT_H_
 #define CHAPARRAL_EXECUTER_VARIANT_H_
 
+#include <memory>
 #include "bonavista/base/macros.h"
-#include "bonavista/memory/ref_counted.h"
-#include "bonavista/memory/scoped_refptr.h"
 
-class Variant : public RefCounted {
+using std::shared_ptr;
+
+class Variant {
  public:
   template <typename T>
   explicit Variant(T value) : data_(new Data<T>(value)) {}
   template <typename T>
-  explicit Variant(T* value) : data_(new ScopedRefData<T>(value)) {}
+  explicit Variant(const shared_ptr<T>& value) : data_(new PointerData<T>(value)) {}
   ~Variant();
 
   template <typename T>
   bool Get(T* out) const {
     DCHECK(out);
 
-    const Data<T>* data = dynamic_cast<const Data<T>*>(data_.ptr());
+    const Data<T>* data = dynamic_cast<const Data<T>*>(data_.get());
     if (data) {
       *out = data->value();
       return true;
@@ -27,12 +28,11 @@ class Variant : public RefCounted {
   }
 
   template <typename T>
-  bool Get(T** out) const {
+  bool Get(shared_ptr<T>* out) const {
     DCHECK(out);
 
-    const ScopedRefData<T>* data = dynamic_cast<const ScopedRefData<T>*>(data_.ptr());
+    const PointerData<T>* data = dynamic_cast<const PointerData<T>*>(data_.get());
     if (data) {
-      data->value()->AddRef();
       *out = data->value();
       return true;
     }
@@ -65,20 +65,20 @@ class Variant : public RefCounted {
   };
 
   template <typename T>
-  class ScopedRefData : public DataBase {
+  class PointerData : public DataBase {
    public:
-    explicit ScopedRefData(T* t) : value_(t) {}
-    virtual ~ScopedRefData() {}
+    explicit PointerData(const shared_ptr<T> t) : value_(t) {}
+    virtual ~PointerData() {}
 
-    T* value() const { return value_.ptr(); }
+    const shared_ptr<T>& value() const { return value_; }
 
    private:
-    scoped_refptr<T> value_;
+    shared_ptr<T> value_;
 
-    DISALLOW_COPY_AND_ASSIGN(ScopedRefData);
+    DISALLOW_COPY_AND_ASSIGN(PointerData);
   };
 
-  scoped_ptr<const DataBase> data_;
+  std::unique_ptr<const DataBase> data_;
 
   DISALLOW_COPY_AND_ASSIGN(Variant);
 };

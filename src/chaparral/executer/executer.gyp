@@ -7,7 +7,6 @@
     'type': 'static_library',
     'dependencies': [
       '../parser/parser.gyp:parser_lib',
-      '../../bonavista/memory/memory.gyp:memory_lib',
     ],
     'sources': [
       'executer.cpp',

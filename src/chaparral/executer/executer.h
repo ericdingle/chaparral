@@ -1,12 +1,13 @@
 #ifndef CHAPARRAL_EXECUTER_EXECUTER_H_
 #define CHAPARRAL_EXECUTER_EXECUTER_H_
 
+#include <memory>
 #include "bonavista/base/macros.h"
-#include "bonavista/memory/scoped_ptr.h"
-#include "bonavista/memory/scoped_refptr.h"
 #include "chaparral/executer/variant.h"
 #include "chaparral/lexer/token.h"
 #include "chaparral/parser/ast_node.h"
+
+using std::shared_ptr;
 
 class Parser;
 
@@ -15,7 +16,7 @@ class Executer {
   Executer(Parser* parser);
   virtual ~Executer();
 
-  bool Execute(const Variant** var);
+  bool Execute(shared_ptr<const Variant>* var);
   template <typename T>
   bool ExecuteT(T* out);
   bool ExecuteAll();
@@ -26,9 +27,8 @@ class Executer {
   const std::string& error() const;
 
  protected:
-  // |node| is owned by the caller. |var| must be AddRef'd.
-  virtual bool ExecuteASTNode(const ASTNode* node, const Variant** var) =0;
-  // |node| is owned by the caller.
+  virtual bool ExecuteASTNode(const ASTNode* node,
+                              shared_ptr<const Variant>* var) =0;
   template <typename T>
   bool ExecuteASTNodeT(const ASTNode* node, T* out);
 
@@ -36,18 +36,18 @@ class Executer {
   std::string error_;
 
  private:
-  Parser* const parser_;
+  Parser* parser_;
 
   DISALLOW_COPY_AND_ASSIGN(Executer);
 };
 
 template <typename T>
 bool Executer::ExecuteT(T* out) {
-  scoped_refptr<const Variant> var;
-  if (!Execute(var.Receive()))
+  shared_ptr<const Variant> var;
+  if (!Execute(&var))
     return false;
 
-  if (!var.ptr() || !var->Get(out)) {
+  if (!var.get() || !var->Get(out)) {
     error_ = "Unexpected result type";
     return false;
   }
@@ -57,11 +57,11 @@ bool Executer::ExecuteT(T* out) {
 
 template <typename T>
 bool Executer::ExecuteASTNodeT(const ASTNode* node, T* out) {
-  scoped_refptr<const Variant> var;
-  if (!ExecuteASTNode(node, var.Receive()))
+  shared_ptr<const Variant> var;
+  if (!ExecuteASTNode(node, &var))
     return false;
 
-  if (!var.ptr() || !var->Get(out)) {
+  if (!var.get() || !var->Get(out)) {
     position_ = node->token()->position();
     error_ = "Unexpected result type";
     return false;

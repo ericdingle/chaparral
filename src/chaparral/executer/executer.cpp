@@ -8,30 +8,32 @@ Executer::Executer(Parser* parser) : parser_(parser) {
 Executer::~Executer() {
 }
 
-bool Executer::Execute(const Variant** var) {
+bool Executer::Execute(shared_ptr<const Variant>* var) {
   DCHECK(var);
 
-  scoped_ptr<const ASTNode> node;
-  if (!parser_->Parse(node.Receive())) {
+  std::unique_ptr<const ASTNode> node;
+  if (!parser_->Parse(&node)) {
     position_ = parser_->position();
     error_ = parser_->error();
     return false;
   }
 
-  if (!node.ptr()) {
-    *var = NULL;
+  if (!node.get()) {
+    var->reset();
     return true;
   }
 
-  return ExecuteASTNode(node.ptr(), var);
+  return ExecuteASTNode(node.get(), var);
 }
 
 bool Executer::ExecuteAll() {
-  scoped_refptr<const Variant> var;
+  shared_ptr<const Variant> var;
 
-  while (HasInput())
-    if (!Execute(var.Receive()))
+  while (HasInput()) {
+    if (!Execute(&var)) {
       return false;
+    }
+  }
 
   return true;
 }
