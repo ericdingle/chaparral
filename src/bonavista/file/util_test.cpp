@@ -21,7 +21,7 @@ TEST(UtilTest, ReadFile) {
     scoped_FILE file(OpenFile("test.tmp", "w"));
     EXPECT_NOT_NULL(file.get());
     const char* str = "test";
-    EXPECT_EQ(fwrite(str, 1, strlen(str), file.get()), strlen(str));
+    EXPECT_EQ(strlen(str), fwrite(str, 1, strlen(str), file.get()));
   }
 
   std::string contents;

@@ -27,10 +27,10 @@ TEST(CommandLineTest, Program) {
 
 TEST(CommandLineTest, Args) {
   const std::vector<std::string>& args = cmd_line_.args();
-  EXPECT_EQ(args.size(), 3u);
-  EXPECT_EQ(args[0], "arg1");
-  EXPECT_EQ(args[1], "-not-a-flag");
-  EXPECT_EQ(args[2], "arg2");
+  EXPECT_EQ(3u, args.size());
+  EXPECT_EQ("arg1", args[0]);
+  EXPECT_EQ("-not-a-flag", args[1]);
+  EXPECT_EQ("arg2", args[2]);
 }
 
 TEST(CommandLineTest, HasFlag) {
@@ -40,10 +40,10 @@ TEST(CommandLineTest, HasFlag) {
 }
 
 TEST(CommandLineTest, GetFlag) {
-  EXPECT_EQ(cmd_line_.GetFlag("input"), "file1.txt");
-  EXPECT_EQ(cmd_line_.GetFlag("output"), "");
-  EXPECT_EQ(cmd_line_.GetFlag("enable-logging"), "");
+  EXPECT_EQ("file1.txt", cmd_line_.GetFlag("input"));
+  EXPECT_EQ("", cmd_line_.GetFlag("output"));
+  EXPECT_EQ("", cmd_line_.GetFlag("enable-logging"));
 
-  EXPECT_EQ(cmd_line_.GetFlag("input", "def"), "file1.txt");
-  EXPECT_EQ(cmd_line_.GetFlag("blah", "def"), "def");
+  EXPECT_EQ("file1.txt", cmd_line_.GetFlag("input", "def"));
+  EXPECT_EQ("def", cmd_line_.GetFlag("blah", "def"));
 }

@@ -23,16 +23,16 @@ TEST(ScopedFileTest, ConstructorAndDestructor) {
     scoped_FILE scoped_file(file_);
 
     int bytes[] = {1, 2, 3, 4};
-    EXPECT_EQ(fwrite(bytes, sizeof(int), 4, file_), 4u);
+    EXPECT_EQ(4u, fwrite(bytes, sizeof(int), 4, file_));
 
-    EXPECT_EQ(fseek(file_, 0, SEEK_SET), 0u);
+    EXPECT_EQ(0, fseek(file_, 0, SEEK_SET));
     int buffer[ARRAY_SIZE(bytes)];
-    EXPECT_EQ(fread(&buffer, sizeof(int), 4, file_), 4u);
+    EXPECT_EQ(4u, fread(&buffer, sizeof(int), 4, file_));
 
     for (uint i = 0; i < ARRAY_SIZE(bytes); ++i) {
-      EXPECT_EQ(buffer[i], bytes[i]);
+      EXPECT_EQ(bytes[i], buffer[i]);
     };
   }
 
-  EXPECT_NOT_EQ(fseek(file_, 0, SEEK_SET), 0);
+  EXPECT_NOT_EQ(0, fseek(file_, 0, SEEK_SET));
 }
