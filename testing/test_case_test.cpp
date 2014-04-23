@@ -10,13 +10,13 @@ TEST_CASE(TestCaseTest) {
 };
 
 TEST(TestCaseTest, ExpectEq) {
-  EXPECT_EQ(a_, 0);
-  EXPECT_EQ(a_ == 0, true);
+  EXPECT_EQ(0, a_);
+  EXPECT_EQ(true, a_ == 0);
 }
 
 TEST(TestCaseTest, ExpectNotEq) {
-  EXPECT_NOT_EQ(a_, 1);
-  EXPECT_NOT_EQ(a_ == 1, true);
+  EXPECT_NOT_EQ(1, a_);
+  EXPECT_NOT_EQ(true, a_ == 1);
 }
 
 TEST(TestCaseTest, ExpectTrue) {

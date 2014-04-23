@@ -9,8 +9,6 @@
       '../logging/logging.gyp:logging_lib',
     ],
     'sources': [
-      'inst_count.cpp',
-      'inst_count.h',
       'test_case.cpp',
       'test_case.h',
       'test_case_expect.h',
@@ -29,7 +27,6 @@
       'testing_main',
     ],
     'sources': [
-      'inst_count_test.cpp',
       'test_case_test.cpp',
     ],
   }],
