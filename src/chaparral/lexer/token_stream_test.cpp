@@ -39,44 +39,44 @@ TEST(TokenStreamTest, GetNextToken) {
   std::unique_ptr<const Token> token;
   EXPECT_TRUE(token_stream.GetNextToken(&token));
   EXPECT_TRUE(token->IsType(TestLexer::TYPE_CHAR));
-  EXPECT_EQ(token->value(), "a");
-  EXPECT_EQ(token->position().line, 1);
-  EXPECT_EQ(token->position().column, 1);
+  EXPECT_EQ("a", token->value());
+  EXPECT_EQ(1u, token->position().line);
+  EXPECT_EQ(1u, token->position().column);
 
   EXPECT_TRUE(token_stream.GetNextToken(&token));
   EXPECT_TRUE(token->IsType(TestLexer::TYPE_CHAR));
-  EXPECT_EQ(token->value(), "b");
-  EXPECT_EQ(token->position().line, 1);
-  EXPECT_EQ(token->position().column, 3);
+  EXPECT_EQ("b", token->value());
+  EXPECT_EQ(1u, token->position().line);
+  EXPECT_EQ(3u, token->position().column);
 
   EXPECT_TRUE(token_stream.GetNextToken(&token));
   EXPECT_TRUE(token->IsType(TestLexer::TYPE_CHAR));
-  EXPECT_EQ(token->value(), "c");
-  EXPECT_EQ(token->position().line, 1);
-  EXPECT_EQ(token->position().column, 4);
+  EXPECT_EQ("c", token->value());
+  EXPECT_EQ(1u, token->position().line);
+  EXPECT_EQ(4u, token->position().column);
 
   EXPECT_TRUE(token_stream.GetNextToken(&token));
   EXPECT_TRUE(token->IsType(TestLexer::TYPE_CHAR));
-  EXPECT_EQ(token->value(), "d");
-  EXPECT_EQ(token->position().line, 2);
-  EXPECT_EQ(token->position().column, 1);
+  EXPECT_EQ("d", token->value());
+  EXPECT_EQ(2u, token->position().line);
+  EXPECT_EQ(1u, token->position().column);
 
   EXPECT_TRUE(token_stream.GetNextToken(&token));
   EXPECT_TRUE(token->IsType(TestLexer::TYPE_CHAR));
-  EXPECT_EQ(token->value(), "e");
-  EXPECT_EQ(token->position().line, 2);
-  EXPECT_EQ(token->position().column, 2);
+  EXPECT_EQ("e", token->value());
+  EXPECT_EQ(2u, token->position().line);
+  EXPECT_EQ(2u, token->position().column);
 
   EXPECT_TRUE(token_stream.GetNextToken(&token));
   EXPECT_TRUE(token->IsType(TestLexer::TYPE_END_OF_INPUT));
-  EXPECT_EQ(token->value(), "(end of input)");
-  EXPECT_EQ(token->position().line, 2);
-  EXPECT_EQ(token->position().column, 5);
+  EXPECT_EQ("(end of input)", token->value());
+  EXPECT_EQ(2u, token->position().line);
+  EXPECT_EQ(5u, token->position().column);
 
   EXPECT_TRUE(token_stream.GetNextToken(&token));
   EXPECT_TRUE(token->IsType(TestLexer::TYPE_END_OF_INPUT));
-  EXPECT_EQ(token->value(), "(end of input)");
-  EXPECT_EQ(token->position().line, 2);
-  EXPECT_EQ(token->position().column, 5);
+  EXPECT_EQ("(end of input)", token->value());
+  EXPECT_EQ(2u, token->position().line);
+  EXPECT_EQ(5u, token->position().column);
   EXPECT_FALSE(token_stream.HasInput());
 }

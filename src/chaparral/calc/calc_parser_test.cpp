@@ -70,14 +70,14 @@ TEST(CalcParserTest, ParseOperator) {
     Init(input.c_str());
     EXPECT_TRUE(parser_->Parse(&root_));
 
-    EXPECT_EQ(root_->token()->type(), types[i]);
-    EXPECT_EQ(root_->children().size(), 2);
+    EXPECT_EQ(types[i], root_->token()->type());
+    EXPECT_EQ(2u, root_->children().size());
 
-    EXPECT_EQ(root_->children()[0]->token()->type(), CalcLexer::TYPE_NUMBER);
-    EXPECT_EQ(root_->children()[0]->token()->value(), "1");
+    EXPECT_EQ(CalcLexer::TYPE_NUMBER, root_->children()[0]->token()->type());
+    EXPECT_EQ("1", root_->children()[0]->token()->value());
 
-    EXPECT_EQ(root_->children()[1]->token()->type(), CalcLexer::TYPE_NUMBER);
-    EXPECT_EQ(root_->children()[1]->token()->value(), "2");
+    EXPECT_EQ(CalcLexer::TYPE_NUMBER, root_->children()[1]->token()->type());
+    EXPECT_EQ("2", root_->children()[1]->token()->value());
   }
 }
 
@@ -105,6 +105,6 @@ TEST(CalcParserTest, OperatorPrecedence) {
   for (uint i = 0; i < ARRAY_SIZE(inputs); ++i) {
     Init(inputs[i]);
     EXPECT_TRUE(parser_->Parse(&root_));
-    EXPECT_EQ(root_->token()->type(), types[i]);
+    EXPECT_EQ(types[i], root_->token()->type());
   }
 }

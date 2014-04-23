@@ -37,7 +37,7 @@ TEST(CalcExecuterTest, ExecuteUnknown) {
 TEST(CalcExecuterTest, ExecuteNumber) {
   Init("1");
   EXPECT_TRUE(executer_->ExecuteT(&d_));
-  EXPECT_EQ(d_, 1);
+  EXPECT_EQ(1, d_);
 }
 
 TEST(CalcExecuterTest, ExecuteOperator) {
@@ -48,6 +48,6 @@ TEST(CalcExecuterTest, ExecuteOperator) {
     std::string input = StringFormat("3%c3", ops[i]);
     Init(input.c_str());
     EXPECT_TRUE(executer_->ExecuteT(&d_));
-    EXPECT_EQ(d_, results[i]);
+    EXPECT_EQ(results[i], d_);
   }
 }

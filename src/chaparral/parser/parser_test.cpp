@@ -126,7 +126,7 @@ TEST(ParserTest, Prefix) {
   EXPECT_TRUE(parser_->Parse(&root_));
   EXPECT_NOT_NULL(root_.get());
   EXPECT_TRUE(root_->token()->IsType(TestLexer::TYPE_DIGIT));
-  EXPECT_EQ(root_->children().size(), 0);
+  EXPECT_EQ(0u, root_->children().size());
 
   EXPECT_FALSE(parser_->HasInput());
   EXPECT_TRUE(parser_->Parse(&root_));
@@ -144,17 +144,17 @@ TEST(ParserTest, Infix) {
   EXPECT_TRUE(parser_->Parse(&root_));
   EXPECT_NOT_NULL(root_.get());
   EXPECT_TRUE(root_->token()->IsType(TestLexer::TYPE_PLUS));
-  EXPECT_EQ(root_->children().size(), 2);
+  EXPECT_EQ(2u, root_->children().size());
 
   const ASTNode* child = root_->children()[0].get();
   EXPECT_TRUE(child->token()->IsType(TestLexer::TYPE_DIGIT));
-  EXPECT_EQ(child->token()->value(), "1");
-  EXPECT_EQ(child->children().size(), 0);
+  EXPECT_EQ("1", child->token()->value());
+  EXPECT_EQ(0u, child->children().size());
 
   child = root_->children()[1].get();
   EXPECT_TRUE(child->token()->IsType(TestLexer::TYPE_DIGIT));
-  EXPECT_EQ(child->token()->value(), "2");
-  EXPECT_EQ(child->children().size(), 0);
+  EXPECT_EQ("2", child->token()->value());
+  EXPECT_EQ(0u, child->children().size());
 
   EXPECT_TRUE(parser_->Parse(&root_));
   EXPECT_NULL(root_.get());
@@ -171,8 +171,8 @@ TEST(ParserTest, ConsumeToken) {
   EXPECT_TRUE(parser_->Parse(&root_));
   EXPECT_NOT_NULL(root_.get());
   EXPECT_TRUE(root_->token()->IsType(TestLexer::TYPE_DIGIT));
-  EXPECT_EQ(root_->token()->value(), "0");
-  EXPECT_EQ(root_->children().size(), 0);
+  EXPECT_EQ("0", root_->token()->value());
+  EXPECT_EQ(0u, root_->children().size());
 
   EXPECT_TRUE(parser_->Parse(&root_));
   EXPECT_NULL(root_.get());
@@ -181,8 +181,8 @@ TEST(ParserTest, ConsumeToken) {
 TEST(ParserTest, ConsumeTokenError) {
   Init("0");
   EXPECT_FALSE(parser_->Parse(&root_));
-  EXPECT_EQ(parser_->position().line, 1);
-  EXPECT_EQ(parser_->position().column, 2);
+  EXPECT_EQ(1u, parser_->position().line);
+  EXPECT_EQ(2u, parser_->position().column);
   EXPECT_FALSE(parser_->error().empty());
 }
 
@@ -193,7 +193,7 @@ TEST(ParserTest, ParseMultiple) {
     EXPECT_TRUE(parser_->Parse(&root_));
     EXPECT_NOT_NULL(root_.get());
     EXPECT_TRUE(root_->token()->IsType(TestLexer::TYPE_DIGIT));
-    EXPECT_EQ(root_->children().size(), 0);
+    EXPECT_EQ(0u, root_->children().size());
   }
 
   EXPECT_TRUE(parser_->Parse(&root_));

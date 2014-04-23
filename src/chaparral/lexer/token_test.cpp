@@ -12,8 +12,8 @@ TEST(TokenTest, Constructor) {
 
   Token token(1, "lazy4", position);
   EXPECT_TRUE(token.IsType(1));
-  EXPECT_EQ(token.type(), 1);
-  EXPECT_EQ(token.value(), "lazy4");
-  EXPECT_EQ(token.position().line, 12);
-  EXPECT_EQ(token.position().column, 54);
+  EXPECT_EQ(1, token.type());
+  EXPECT_EQ("lazy4", token.value());
+  EXPECT_EQ(12u, token.position().line);
+  EXPECT_EQ(54u, token.position().column);
 }

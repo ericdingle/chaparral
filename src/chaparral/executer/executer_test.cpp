@@ -109,7 +109,7 @@ TEST(ExecuterTest, Execute) {
   EXPECT_TRUE(executer_->Execute(&var_));
   uint i = 0;
   EXPECT_TRUE(var_->Get(&i));
-  EXPECT_EQ(i, 5);
+  EXPECT_EQ(5u, i);
   EXPECT_FALSE(executer_->HasInput());
 }
 
@@ -123,7 +123,7 @@ TEST(ExecuterTest, ExecuteT) {
   Init("5");
   uint i = 0;
   EXPECT_TRUE(executer_->ExecuteT(&i));
-  EXPECT_EQ(i, 5);
+  EXPECT_EQ(5u, i);
 }
 
 TEST(ExecuterTest, ExecuteTError) {

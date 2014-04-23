@@ -10,7 +10,7 @@ TEST(VariantTest, GetPrimitive) {
 
   int i = 0;
   EXPECT_TRUE(var.Get(&i));
-  EXPECT_EQ(i, 5);
+  EXPECT_EQ(5, i);
 
   double d;
   EXPECT_FALSE(var.Get(&d));

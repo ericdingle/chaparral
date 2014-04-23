@@ -31,9 +31,9 @@ TEST(CalcLexerTest, TokenizeOperator) {
   for (uint i = 0; i < ARRAY_SIZE(inputs); ++i) {
     input_ = inputs[i];
     EXPECT_TRUE(lexer_.GetToken(input_, 0, &type_, &value_, &count_, &error_));
-    EXPECT_EQ(type_, types[i]);
-    EXPECT_EQ(value_, input_);
-    EXPECT_EQ(count_, 1);
+    EXPECT_EQ(types[i], type_);
+    EXPECT_EQ(input_, value_);
+    EXPECT_EQ(1u, count_);
   }
 }
 
@@ -46,9 +46,9 @@ TEST(CalcLexerTest, TokenizeNumber) {
   for (uint i = 0; i < ARRAY_SIZE(inputs); ++i) {
     input_ = inputs[i];
     EXPECT_TRUE(lexer_.GetToken(input_, 0, &type_, &value_, &count_, &error_));
-    EXPECT_EQ(type_, CalcLexer::TYPE_NUMBER);
-    EXPECT_EQ(value_, input_);
-    EXPECT_EQ(count_, input_.length());
+    EXPECT_EQ(CalcLexer::TYPE_NUMBER, type_);
+    EXPECT_EQ(input_, value_);
+    EXPECT_EQ(input_.length(), count_);
   }
 }
 

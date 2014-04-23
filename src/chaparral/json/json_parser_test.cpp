@@ -62,12 +62,12 @@ TEST(JsonParserTest, ParseObject) {
   Init("{}");
   EXPECT_TRUE(parser_->Parse(&root_));
   EXPECT_TRUE(root_->token()->IsType(JsonLexer::TYPE_LEFT_BRACE));
-  EXPECT_EQ(root_->children().size(), 0);
+  EXPECT_EQ(0u, root_->children().size());
 
   Init("{\"a\": 1, \"b\": false}");
   EXPECT_TRUE(parser_->Parse(&root_));
   EXPECT_TRUE(root_->token()->IsType(JsonLexer::TYPE_LEFT_BRACE));
-  EXPECT_EQ(root_->children().size(), 4);
+  EXPECT_EQ(4u, root_->children().size());
 
   EXPECT_TRUE(root_->children()[0]->token()->IsType(JsonLexer::TYPE_STRING));
   EXPECT_TRUE(root_->children()[1]->token()->IsType(JsonLexer::TYPE_NUMBER));
@@ -101,12 +101,12 @@ TEST(JsonParserTest, ParseArray) {
   Init("[]");
   EXPECT_TRUE(parser_->Parse(&root_));
   EXPECT_TRUE(root_->token()->IsType(JsonLexer::TYPE_LEFT_BRACKET));
-  EXPECT_EQ(root_->children().size(), 0);
+  EXPECT_EQ(0u, root_->children().size());
 
   Init("[1, false, \"test\"]");
   EXPECT_TRUE(parser_->Parse(&root_));
   EXPECT_TRUE(root_->token()->IsType(JsonLexer::TYPE_LEFT_BRACKET));
-  EXPECT_EQ(root_->children().size(), 3);
+  EXPECT_EQ(3u, root_->children().size());
 
   EXPECT_TRUE(root_->children()[0]->token()->IsType(JsonLexer::TYPE_NUMBER));
   EXPECT_TRUE(root_->children()[1]->token()->IsType(JsonLexer::TYPE_FALSE));
