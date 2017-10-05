@@ -3,8 +3,8 @@
 
 #include <memory>
 #include "executer/variant.h"
-#include "lexer/token.h"
-#include "parser/ast_node.h"
+#include "third_party/bonavista/src/lexer/token.h"
+#include "third_party/bonavista/src/parser/ast_node.h"
 
 using std::shared_ptr;
 
