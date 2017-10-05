@@ -6,7 +6,7 @@
 #include "lexer/token_stream.h"
 #include "parser/ast_node.h"
 #include "parser/parser.h"
-#include "third_party/googletest/src/googletest/include/gtest/gtest.h"
+#include "third_party/googletest/googletest/include/gtest/gtest.h"
 
 class TestLexer : public Lexer {
  public:

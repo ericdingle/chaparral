@@ -3,7 +3,7 @@
 #include "calc/calc_parser.h"
 #include "lexer/token_stream.h"
 #include "parser/ast_node.h"
-#include "third_party/googletest/src/googletest/include/gtest/gtest.h"
+#include "third_party/googletest/googletest/include/gtest/gtest.h"
 
 class CalcParserTest : public testing::Test {
  protected:
