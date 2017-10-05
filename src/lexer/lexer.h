@@ -27,4 +27,4 @@ class Lexer {
   static bool IsDigit(const char& c);
 };
 
-#endif
+#endif  // LEXER_LEXER_H_
