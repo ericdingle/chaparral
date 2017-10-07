@@ -31,5 +31,5 @@ if (chaparral_tests)
   add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/third_party/googletest")
 endif()
 
-add_subdirectory(calc)
+add_subdirectory(calc EXCLUDE_FROM_ALL)
 add_subdirectory(executer)
