@@ -2,11 +2,6 @@ cmake_minimum_required (VERSION 2.8.2)
 
 project(chapparal)
 
-# C++11.
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-# Include relative to root source dir.
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-
 # Bonavista.
 configure_file(Bonavista.cmake third_party/bonavista/CMakeLists.txt)
 execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
@@ -30,6 +25,11 @@ if (chaparral_tests)
   set(BUILD_GTEST ON CACHE BOOL "" FORCE)
   add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/third_party/googletest")
 endif()
+
+# C++11.
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+# Include relative to root source dir.
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_subdirectory(calc EXCLUDE_FROM_ALL)
 add_subdirectory(executer)
