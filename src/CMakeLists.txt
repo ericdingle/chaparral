@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 2.8.2)
 
-project(chapparal)
+project(chaparral)
 
 # Bonavista.
 configure_file(Bonavista.cmake third_party/bonavista/CMakeLists.txt)
