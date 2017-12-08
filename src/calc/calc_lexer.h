@@ -1,14 +1,14 @@
 #ifndef CALC_CALC_LEXER_H_
 #define CALC_CALC_LEXER_H_
 
-#include "lexer/lexer.h"
+#include "third_party/bonavista/src/lexer/lexer.h"
 
 class CalcLexer : public Lexer {
  public:
-  CalcLexer();
+  CalcLexer() = default;
   CalcLexer(CalcLexer&) = delete;
   CalcLexer& operator=(CalcLexer&) = delete;
-  virtual ~CalcLexer();
+  ~CalcLexer() override = default;
 
   enum Type {
     TYPE_ASTERISK,
@@ -20,20 +20,12 @@ class CalcLexer : public Lexer {
     TYPE_SLASH
   };
 
-  virtual bool GetToken(const std::string& input,
-                        int index,
-                        int* type,
-                        std::string* value,
-                        int* count,
-                        std::string* error) const;
+  StatusOr<std::unique_ptr<Token>> GetToken(
+      const char* input, int line, int column) const override;
 
  private:
-  bool GetNumberToken(const std::string& input,
-                      int index,
-                      int* type,
-                      std::string* value,
-                      int* count,
-                      std::string* error) const;
+  StatusOr<std::unique_ptr<Token>> GetNumberToken(
+      const char* input, int line, int column) const;
 };
 
 #endif  // CALC_CALC_LEXER_H_

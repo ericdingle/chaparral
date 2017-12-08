@@ -1,11 +1,10 @@
 #include "executer/executer.h"
-
-#include "executer/executer.h"
+#include "executer/executer_test_fixture.h"
 #include "executer/variant.h"
-#include "lexer/lexer.h"
-#include "lexer/token_stream.h"
-#include "parser/ast_node.h"
-#include "parser/parser.h"
+#include "third_party/bonavista/src/lexer/lexer.h"
+#include "third_party/bonavista/src/parser/node.h"
+#include "third_party/bonavista/src/parser/parser.h"
+#include "third_party/bonavista/src/util/status_test_macros.h"
 #include "third_party/googletest/googletest/include/gtest/gtest.h"
 
 class TestLexer : public Lexer {
@@ -14,134 +13,81 @@ class TestLexer : public Lexer {
     TYPE_DIGIT
   };
 
-  virtual bool GetToken(const std::string& input,
-                        int index,
-                        int* type,
-                        std::string* value,
-                        int* count,
-                        std::string* error) const {
-    if (!IsDigit(input[index])) {
-      *error = "Expecting digit";
-      return false;
+  StatusOr<std::unique_ptr<Token>> GetToken(
+      const char* input, int line, int column) const override {
+    if (IsDigit(*input)) {
+      return std::unique_ptr<Token>(new Token(TYPE_DIGIT, std::string(1, *input),
+                                              line, column));
     }
 
-    *type = TYPE_DIGIT;
-    *value = input[index];
-    *count = 1;
-    return true;
+    return UnexpectedCharacter(*input, line, column);
   }
 };
 
 class TestParser : public Parser {
  public:
-  TestParser(TokenStream* stream) : Parser(stream) {}
+  using Parser::Parser;
 
  protected:
-  virtual bool ParsePrefixToken(std::unique_ptr<const Token> token,
-                                std::unique_ptr<const ASTNode>* root) {
-    root->reset(new ASTNode(std::move(token)));
-    return true;
+  StatusOr<std::unique_ptr<Node>> ParsePrefixToken(
+      std::unique_ptr<const Token> token) override {
+    return std::unique_ptr<Node>(new Node(std::move(token)));
   }
 };
 
 class TestExecuter : public Executer {
  public:
-  TestExecuter(Parser* parser) : Executer(parser) {}
+  using Executer::Executer;
+  using Executer::ExecuteNodeT;
 
  protected:
-  virtual bool ExecuteASTNode(const ASTNode* node,
-                              std::shared_ptr<const Variant>* var) {
-    int digit = node->token()->value()[0] - 0x30;
+  StatusOr<std::shared_ptr<Variant>> ExecuteNode(const Node* node) override {
+    int digit = node->token().value()[0] - 0x30;
     if (digit == 9) {
-      position_ = node->token()->position();
-      error_ = "No nines!";
-      return false;
+      return Status("No nines!", node->token().line(), node->token().column());
     }
 
-    var->reset(new Variant(digit));
-    return true;
+    return std::make_shared<Variant>(digit);
   }
 };
 
-class ExecuterTest : public testing::Test {
- protected:
-  void Init(const char* input) {
-    stream_.reset(new TokenStream(&lexer_, input));
-    parser_.reset(new TestParser(stream_.get()));
-    executer_.reset(new TestExecuter(parser_.get()));
-  }
-
-  TestLexer lexer_;
-  std::unique_ptr<TokenStream> stream_;
-  std::unique_ptr<Parser> parser_;
-  std::unique_ptr<Executer> executer_;
-  std::shared_ptr<const Variant> var_;
+class ExecuterTest
+    : public ExecuterTestFixture<TestLexer, TestParser, TestExecuter> {
 };
 
 TEST_F(ExecuterTest, Empty) {
-  Init("");
-  EXPECT_FALSE(executer_->HasInput());
-  EXPECT_TRUE(executer_->Execute(&var_));
-  EXPECT_EQ(nullptr, var_.get());
-  EXPECT_FALSE(executer_->HasInput());
+  EXPECT_STATUS(Execute("").status(), "Unexpected token: (end of input)", 1, 1);
 }
 
 TEST_F(ExecuterTest, BadToken) {
-  Init("a");
-  EXPECT_TRUE(executer_->HasInput());
-  EXPECT_FALSE(executer_->Execute(&var_));
-  EXPECT_FALSE(executer_->error().empty());
-  EXPECT_TRUE(executer_->HasInput());
+  EXPECT_STATUS(Execute("a").status(), "Unexpected character: a", 1, 1);
 }
 
 TEST_F(ExecuterTest, Execute) {
-  Init("5");
-  EXPECT_TRUE(executer_->HasInput());
-  EXPECT_TRUE(executer_->Execute(&var_));
+  std::shared_ptr<Variant> v = Execute("5").value();
   int i = 0;
-  EXPECT_TRUE(var_->Get(&i));
+  EXPECT_TRUE(v->Get(&i));
   EXPECT_EQ(5, i);
-  EXPECT_FALSE(executer_->HasInput());
 }
 
 TEST_F(ExecuterTest, ExecuteError) {
-  Init("9");
-  EXPECT_FALSE(executer_->Execute(&var_));
-  EXPECT_FALSE(executer_->error().empty());
-}
-
-TEST_F(ExecuterTest, ExecuteT) {
-  Init("5");
-  int i = 0;
-  EXPECT_TRUE(executer_->ExecuteT(&i));
-  EXPECT_EQ(5, i);
-}
-
-TEST_F(ExecuterTest, ExecuteTError) {
-  int i = 0;
-  Init("");
-  EXPECT_FALSE(executer_->ExecuteT(&i));
-  EXPECT_FALSE(executer_->error().empty());
-
-  Init("9");
-  EXPECT_FALSE(executer_->ExecuteT(&i));
-  EXPECT_FALSE(executer_->error().empty());
-
-  double d = 0;
-  Init("5");
-  EXPECT_FALSE(executer_->ExecuteT(&d));
-  EXPECT_FALSE(executer_->error().empty());
+  EXPECT_STATUS(Execute("9").status(), "No nines!", 1, 1);
 }
 
 TEST_F(ExecuterTest, ExecuteAll) {
-  Init("1 2 3 4 5");
-  EXPECT_TRUE(executer_->ExecuteAll());
-  std::unique_ptr<const Token> token;
-  EXPECT_TRUE(stream_->GetNextToken(&token));
-  EXPECT_TRUE(token->IsType(TestLexer::TYPE_END_OF_INPUT));
+  EXPECT_OK(ExecuteAll("1 2 3 4 5"));
 }
 
 TEST_F(ExecuterTest, ExecuteAllError) {
-  Init("1 3 5 7 9");
-  EXPECT_FALSE(executer_->ExecuteAll());
+  EXPECT_STATUS(ExecuteAll("1 3 5 7 9").status(), "No nines!", 1, 9);
+}
+
+TEST_F(ExecuterTest, ExecuteNodeT) {
+  TestExecuter executer(nullptr);
+
+  Node node(std::unique_ptr<Token>(new Token(TestLexer::TYPE_DIGIT, "1", 1, 1)));
+  EXPECT_EQ(1, executer.ExecuteNodeT<int>(&node).value());
+
+  EXPECT_STATUS(executer.ExecuteNodeT<double>(&node).status(),
+                "Expected type: d", 1, 1);
 }

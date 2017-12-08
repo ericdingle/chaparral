@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <iostream>
 #include <stdio.h>
 #include <string>
@@ -24,14 +25,18 @@ int main() {
     TokenStream stream(&lexer, input);
     CalcParser parser(&stream);
     CalcExecuter executer(&parser);
-    double result = 0;
-    if (!executer.ExecuteT(&result)) {
-      int offset = static_cast<int>(strlen(kInputPrefix) + parser.position().column);
+
+    auto status_or = executer.Execute();
+    if (!status_or.ok()) {
+      auto status = status_or.status();
+      int offset = static_cast<int>(strlen(kInputPrefix) + status.column());
       printf("%*s\n", offset, "^");
-      printf("Error: %s.\n", parser.error().c_str());
+      printf("Error: %s.\n", status.message().c_str());
       continue;
     }
 
+    double result = 0;
+    assert(status_or.value()->Get(&result));
     printf("%f\n", result);
   }
 

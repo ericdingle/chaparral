@@ -1,66 +1,44 @@
-#include <tuple>
-#include <vector>
 #include "calc/calc_lexer.h"
-#include "third_party/googletest/googletest/include/gtest/gtest.h"
+#include "third_party/bonavista/src/lexer/lexer_test_fixture.h"
+#include "third_party/bonavista/src/lexer/token_test_macros.h"
+#include "third_party/bonavista/src/util/status_test_macros.h"
 
-class CalcLexerTest : public testing::Test {
- protected:
-  CalcLexer lexer_;
-
-  std::string input_;
-  int type_;
-  std::string value_;
-  int count_;
-  std::string error_;
+class CalcLexerTest : public LexerTestFixture<CalcLexer> {
 };
 
-TEST_F(CalcLexerTest, TokenizeUnknown) {
-  input_ = ".";
-  EXPECT_FALSE(lexer_.GetToken(input_, 0, &type_, &value_, &count_, &error_));
-  EXPECT_FALSE(error_.empty());
+TEST_F(CalcLexerTest, GetTokenUnexpected) {
+  EXPECT_STATUS(GetToken(".").status(), "Unexpected character: .", 1, 2);
 }
 
-TEST_F(CalcLexerTest, TokenizeOperator) {
-  std::vector<std::tuple<const char*, CalcLexer::Type>> test_cases = {
-      std::make_tuple("*", CalcLexer::TYPE_ASTERISK),
-      std::make_tuple("(", CalcLexer::TYPE_LEFT_PARENTHESIS),
-      std::make_tuple("-", CalcLexer::TYPE_MINUS),
-      std::make_tuple("+", CalcLexer::TYPE_PLUS),
-      std::make_tuple(")", CalcLexer::TYPE_RIGHT_PARENTHESIS),
-      std::make_tuple("/", CalcLexer::TYPE_SLASH),
+TEST_F(CalcLexerTest, GetTokenOperator) {
+  std::pair<const char*, CalcLexer::Type> test_cases[] = {
+      {"*", CalcLexer::TYPE_ASTERISK},
+      {"(", CalcLexer::TYPE_LEFT_PARENTHESIS},
+      {"-", CalcLexer::TYPE_MINUS},
+      {"+", CalcLexer::TYPE_PLUS},
+      {")", CalcLexer::TYPE_RIGHT_PARENTHESIS},
+      {"/", CalcLexer::TYPE_SLASH},
       };
 
-  for (const std::tuple<const char*, CalcLexer::Type>& test_case : test_cases) {
-    input_ = std::get<0>(test_case);
-    EXPECT_TRUE(lexer_.GetToken(input_, 0, &type_, &value_, &count_, &error_));
-    EXPECT_EQ(std::get<1>(test_case), type_);
-    EXPECT_EQ(input_, value_);
-    EXPECT_EQ(1, count_);
+  for (const auto& test_case : test_cases) {
+    const char* input = test_case.first;
+    EXPECT_TOKEN(*GetToken(input).value(), test_case.second, input, 1, 2);
   }
 }
 
-TEST_F(CalcLexerTest, TokenizeNumber) {
-  std::vector<const char*> test_cases = {
-      "0", "1", "12", "123",
-      "0.1", "12.3", "12.34",
-      };
+TEST_F(CalcLexerTest, GetTokenNumber) {
+  const char* test_cases[] = { "0", "1", "12", "123", "0.1", "12.3", "12.34" };
 
   for (const char* test_case : test_cases) {
-    input_ = test_case;
-    EXPECT_TRUE(lexer_.GetToken(input_, 0, &type_, &value_, &count_, &error_));
-    EXPECT_EQ(CalcLexer::TYPE_NUMBER, type_);
-    EXPECT_EQ(input_, value_);
-    EXPECT_EQ(input_.length(), count_);
+    EXPECT_TOKEN(*GetToken(test_case).value(), CalcLexer::TYPE_NUMBER,
+                 test_case, 1, 2);
   }
 }
 
-TEST_F(CalcLexerTest, TokenizeNumberError) {
-  std::vector<const char*> test_cases = { "01", "1." };
+TEST_F(CalcLexerTest, GetTokenNumberError) {
+  const char* test_cases[] = { "1." };
 
   for (const char* test_case : test_cases) {
-    input_ = test_case;
-    error_.clear();
-    EXPECT_FALSE(lexer_.GetToken(input_, 0, &type_, &value_, &count_, &error_));
-    EXPECT_FALSE(error_.empty());
+    EXPECT_STATUS(GetToken(test_case).status(), "Unexpected end of input", 1, 2);
   }
 }

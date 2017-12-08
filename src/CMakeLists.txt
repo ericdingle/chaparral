@@ -2,6 +2,9 @@ cmake_minimum_required (VERSION 2.8.2)
 
 project(chaparral)
 
+# Include relative to root source dir.
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
 # Bonavista.
 configure_file(Bonavista.cmake third_party/bonavista/CMakeLists.txt)
 execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
@@ -29,9 +32,6 @@ endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall")
-
-# Include relative to root source dir.
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_subdirectory(calc EXCLUDE_FROM_ALL)
 add_subdirectory(executer)

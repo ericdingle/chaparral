@@ -1,72 +1,45 @@
 #ifndef EXECUTER_EXECUTER_H_
 #define EXECUTER_EXECUTER_H_
 
+#include <assert.h>
 #include <memory>
 #include "executer/variant.h"
-#include "third_party/bonavista/src/lexer/token.h"
-#include "third_party/bonavista/src/parser/ast_node.h"
-
-using std::shared_ptr;
-
-class Parser;
+#include "third_party/bonavista/src/parser/node.h"
+#include "third_party/bonavista/src/parser/parser.h"
+#include "third_party/bonavista/src/util/status_or.h"
 
 class Executer {
  public:
   Executer(Parser* parser);
   Executer(const Executer&) = delete;
   Executer& operator=(const Executer&) = delete;
-  virtual ~Executer();
+  virtual ~Executer() = default;
 
-  bool Execute(shared_ptr<const Variant>* var);
-  template <typename T>
-  bool ExecuteT(T* out);
-  bool ExecuteAll();
+  StatusOr<std::shared_ptr<Variant>> Execute();
+  Status ExecuteAll();
 
   bool HasInput() const;
 
-  const Token::Position& position() const;
-  const std::string& error() const;
-
  protected:
-  virtual bool ExecuteASTNode(const ASTNode* node,
-                              shared_ptr<const Variant>* var) = 0;
+  virtual StatusOr<std::shared_ptr<Variant>> ExecuteNode(const Node* node) = 0;
   template <typename T>
-  bool ExecuteASTNodeT(const ASTNode* node, T* out);
-
-  Token::Position position_;
-  std::string error_;
+  StatusOr<T> ExecuteNodeT(const Node* node);
 
  private:
   Parser* parser_;
 };
 
 template <typename T>
-bool Executer::ExecuteT(T* out) {
-  shared_ptr<const Variant> var;
-  if (!Execute(&var))
-    return false;
+StatusOr<T> Executer::ExecuteNodeT(const Node* node) {
+  ASSIGN_OR_RETURN(std::shared_ptr<const Variant> var, ExecuteNode(node));
+  assert(var);
 
-  if (!var.get() || !var->Get(out)) {
-    error_ = "Unexpected result type";
-    return false;
+  T t;
+  if (!var->Get(&t)) {
+    return Status(std::string("Expected type: ") + typeid(t).name(),
+                  node->token().line(), node->token().column());
   }
-
-  return true;
-}
-
-template <typename T>
-bool Executer::ExecuteASTNodeT(const ASTNode* node, T* out) {
-  shared_ptr<const Variant> var;
-  if (!ExecuteASTNode(node, &var))
-    return false;
-
-  if (!var.get() || !var->Get(out)) {
-    position_ = node->token()->position();
-    error_ = "Unexpected result type";
-    return false;
-  }
-
-  return true;
+  return t;
 }
 
 #endif  // EXECUTER_EXECUTER_H_

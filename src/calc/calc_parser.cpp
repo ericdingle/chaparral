@@ -1,32 +1,14 @@
 #include "calc/calc_parser.h"
 
-#include <vector>
 #include "calc/calc_lexer.h"
-#include "parser/ast_node.h"
 
-CalcParser::CalcParser(TokenStream* token_stream) : Parser(token_stream) {
-}
+StatusOr<std::unique_ptr<Node>> CalcParser::Parse() {
+  ASSIGN_OR_RETURN(auto root, Parser::Parse());
 
-CalcParser::~CalcParser() {
-}
+  if (HasInput())
+    return UnexpectedToken(*look_ahead_token_);
 
-bool CalcParser::Parse(std::unique_ptr<const ASTNode>* root) {
-  std::unique_ptr<const ASTNode> node;
-  if (!Parser::Parse(&node))
-    return false;
-  if (!node.get()) {
-    error_ = "Input is empty.";
-    return false;
-  }
-
-  std::unique_ptr<const ASTNode> dummy;
-  if (!Parser::Parse(&dummy) || dummy.get()) {
-    error_ = "Encountered more than one expression.";
-    return false;
-  }
-
-  *root = std::move(node);
-  return true;
+  return std::move(root);
 }
 
 int CalcParser::GetBindingPower(int type) const {
@@ -42,50 +24,36 @@ int CalcParser::GetBindingPower(int type) const {
   }
 }
 
-bool CalcParser::ParsePrefixToken(std::unique_ptr<const Token> token,
-                                  std::unique_ptr<const ASTNode>* root) {
+StatusOr<std::unique_ptr<Node>> CalcParser::ParsePrefixToken(
+    std::unique_ptr<const Token> token) {
   if (token->IsType(CalcLexer::TYPE_LEFT_PARENTHESIS)) {
-    std::unique_ptr<const ASTNode> node;
-    if (!ParseExpression(0, &node))
-      return false;
-
-    if (!ConsumeToken(CalcLexer::TYPE_RIGHT_PARENTHESIS))
-      return false;
-
-    *root = std::move(node);
-    return true;
+    ASSIGN_OR_RETURN(auto node, ParseExpression(0));
+    RETURN_IF_ERROR(ConsumeToken(CalcLexer::TYPE_RIGHT_PARENTHESIS));
+    return std::move(node);
   }
 
   if (token->IsType(CalcLexer::TYPE_NUMBER)) {
-    root->reset(new ASTNode(std::move(token)));
-    return true;
+    return std::unique_ptr<Node>(new Node(std::move(token)));
   }
 
-  position_ = token->position();
-  error_ = "Unexpected token: " + token->value();
-  return false;
+  return UnexpectedToken(*token);
 }
 
-bool CalcParser::ParseInfixToken(std::unique_ptr<const Token> token,
-                                 std::unique_ptr<const ASTNode> left,
-                                 std::unique_ptr<const ASTNode>* root) {
+StatusOr<std::unique_ptr<Node>> CalcParser::ParseInfixToken(
+    std::unique_ptr<const Token> token, std::unique_ptr<const Node> left) {
   if (token->IsType(CalcLexer::TYPE_ASTERISK) ||
       token->IsType(CalcLexer::TYPE_MINUS) ||
       token->IsType(CalcLexer::TYPE_PLUS) ||
       token->IsType(CalcLexer::TYPE_SLASH)) {
-    std::unique_ptr<ASTNode> node(new ASTNode(std::move(token)));
+    std::unique_ptr<Node> node(new Node(std::move(token)));
     node->AddChild(std::move(left));
 
-    std::unique_ptr<const ASTNode> right;
-    if (!ParseExpression(GetBindingPower(node->token()->type()), &right))
-      return false;
+    ASSIGN_OR_RETURN(auto right,
+                     ParseExpression(GetBindingPower(node->token().type())));
     node->AddChild(std::move(right));
 
-    *root = std::move(node);
-    return true;
+    return std::move(node);
   }
 
-  position_ = token->position();
-  error_ = "Unexpected token: " + token->value();
-  return false;
+  return UnexpectedToken(*token);
 }

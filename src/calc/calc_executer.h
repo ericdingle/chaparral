@@ -5,14 +5,13 @@
 
 class CalcExecuter : public Executer {
  public:
-  CalcExecuter(Parser* parser);
+  using Executer::Executer;
   CalcExecuter(const CalcExecuter&) = delete;
   CalcExecuter& operator=(const CalcExecuter&) = delete;
-  virtual ~CalcExecuter();
+  ~CalcExecuter() override = default;
 
  protected:
-  virtual bool ExecuteASTNode(const ASTNode* node,
-                              std::shared_ptr<const Variant>* var);
+  StatusOr<std::shared_ptr<Variant>> ExecuteNode(const Node* node);
 };
 
 #endif  // CALC_CALC_EXECUTER_H_

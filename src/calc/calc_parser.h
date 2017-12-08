@@ -5,20 +5,20 @@
 
 class CalcParser : public Parser {
  public:
-  CalcParser(TokenStream* token_stream);
+  using Parser::Parser;
   CalcParser(const CalcParser&) = delete;
   CalcParser& operator=(const CalcParser&) = delete;
-  virtual ~CalcParser();
+  ~CalcParser() override = default;
 
-  virtual bool Parse(std::unique_ptr<const ASTNode>* root);
+  StatusOr<std::unique_ptr<Node>> Parse() override;
 
  protected:
-  virtual int GetBindingPower(int type) const;
-  virtual bool ParsePrefixToken(std::unique_ptr<const Token> token,
-                                std::unique_ptr<const ASTNode>* root);
-  virtual bool ParseInfixToken(std::unique_ptr<const Token> token,
-                               std::unique_ptr<const ASTNode> left,
-                               std::unique_ptr<const ASTNode>* root);
+  int GetBindingPower(int type) const override;
+  StatusOr<std::unique_ptr<Node>> ParsePrefixToken(
+      std::unique_ptr<const Token> token) override;
+  StatusOr<std::unique_ptr<Node>> ParseInfixToken(
+      std::unique_ptr<const Token> token, std::unique_ptr<const Node> left)
+      override;
 };
 
 #endif  // CALC_CALC_PARSER_H_

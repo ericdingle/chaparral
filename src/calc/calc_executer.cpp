@@ -1,47 +1,33 @@
 #include "calc/calc_executer.h"
 
-#include <assert.h>
 #include "calc/calc_lexer.h"
-#include "parser/ast_node.h"
 
-CalcExecuter::CalcExecuter(Parser* parser) : Executer(parser) {
-}
-
-CalcExecuter::~CalcExecuter() {
-}
-
-bool CalcExecuter::ExecuteASTNode(const ASTNode* node,
-                                  shared_ptr<const Variant>* var) {
-  if (node->token()->IsType(CalcLexer::TYPE_ASTERISK) ||
-      node->token()->IsType(CalcLexer::TYPE_MINUS) ||
-      node->token()->IsType(CalcLexer::TYPE_PLUS) ||
-      node->token()->IsType(CalcLexer::TYPE_SLASH)) {
-    double left = 0;
-    assert(ExecuteASTNodeT(node->children()[0].get(), &left));
-
-    double right = 0;
-    assert(ExecuteASTNodeT(node->children()[1].get(), &right));
+StatusOr<std::shared_ptr<Variant>> CalcExecuter::ExecuteNode(const Node* node) {
+  if (node->token().IsType(CalcLexer::TYPE_ASTERISK) ||
+      node->token().IsType(CalcLexer::TYPE_MINUS) ||
+      node->token().IsType(CalcLexer::TYPE_PLUS) ||
+      node->token().IsType(CalcLexer::TYPE_SLASH)) {
+    ASSIGN_OR_RETURN(double left, ExecuteNodeT<double>(node->children()[0].get()));
+    ASSIGN_OR_RETURN(double right, ExecuteNodeT<double>(node->children()[1].get()));
 
     double result = 0;
-    if (node->token()->IsType(CalcLexer::TYPE_ASTERISK))
+    if (node->token().IsType(CalcLexer::TYPE_ASTERISK)) {
       result = left * right;
-    else if (node->token()->IsType(CalcLexer::TYPE_MINUS))
+    } else if (node->token().IsType(CalcLexer::TYPE_MINUS)) {
       result = left - right;
-    else if (node->token()->IsType(CalcLexer::TYPE_PLUS))
+    } else if (node->token().IsType(CalcLexer::TYPE_PLUS)) {
       result = left + right;
-    else
+    } else {
       result = left / right;
+    }
 
-    var->reset(new Variant(result));
-    return true;
+    return std::make_shared<Variant>(result);
   }
 
-  if (node->token()->IsType(CalcLexer::TYPE_NUMBER)) {
-    double value = atof(node->token()->value().c_str());
-    var->reset(new Variant(value));
-    return true;
+  if (node->token().IsType(CalcLexer::TYPE_NUMBER)) {
+    double value = atof(node->token().value().c_str());
+    return std::make_shared<Variant>(value);
   }
 
-  // This should never happen.
-  assert(false);
+  return Status("WTF!", 1, 1);
 }

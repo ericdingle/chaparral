@@ -1,49 +1,24 @@
 #include "executer/executer.h"
 
+#include <assert.h>
 #include "parser/parser.h"
 
 Executer::Executer(Parser* parser) : parser_(parser) {
 }
 
-Executer::~Executer() {
+StatusOr<std::shared_ptr<Variant>> Executer::Execute() {
+  ASSIGN_OR_RETURN(std::unique_ptr<Node> node, parser_->Parse());
+  assert(node);
+  return ExecuteNode(node.get());
 }
 
-bool Executer::Execute(shared_ptr<const Variant>* var) {
-  std::unique_ptr<const ASTNode> node;
-  if (!parser_->Parse(&node)) {
-    position_ = parser_->position();
-    error_ = parser_->error();
-    return false;
-  }
-
-  if (!node.get()) {
-    var->reset();
-    return true;
-  }
-
-  return ExecuteASTNode(node.get(), var);
-}
-
-bool Executer::ExecuteAll() {
-  shared_ptr<const Variant> var;
-
+Status Executer::ExecuteAll() {
   while (HasInput()) {
-    if (!Execute(&var)) {
-      return false;
-    }
+    ASSIGN_OR_RETURN(std::shared_ptr<Variant> v, Execute());
   }
-
-  return true;
+  return Status();
 }
 
 bool Executer::HasInput() const {
   return parser_->HasInput();
-}
-
-const Token::Position& Executer::position() const {
-  return position_;
-}
-
-const std::string& Executer::error() const {
-  return error_;
 }

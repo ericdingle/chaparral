@@ -1,7 +1,7 @@
 #include "executer/variant.h"
 #include "third_party/googletest/googletest/include/gtest/gtest.h"
 
-TEST(VariantTest, GetPrimitive) {
+TEST(VariantTest, Get) {
   Variant var(5);
 
   int i = 0;
@@ -12,24 +12,18 @@ TEST(VariantTest, GetPrimitive) {
   EXPECT_FALSE(var.Get(&d));
 }
 
-class Dummy {
-};
+TEST(VariantTest, GetSharedPtr) {
+  std::shared_ptr<int> i(new int(5));
+  EXPECT_EQ(1, i.use_count());
 
-class Dummy2 {
-};
+  Variant var(i);
+  EXPECT_EQ(2, i.use_count());
 
-TEST(VariantTest, GetObject) {
-  std::shared_ptr<Dummy> dummy(new Dummy());
-  EXPECT_EQ(1, dummy.use_count());
+  std::shared_ptr<int> j;
+  EXPECT_TRUE(var.Get(&j));
+  EXPECT_EQ(i.get(), j.get());
+  EXPECT_EQ(3, i.use_count());
 
-  Variant var(dummy);
-  EXPECT_EQ(2, dummy.use_count());
-
-  std::shared_ptr<Dummy> dummy1;
-  EXPECT_TRUE(var.Get(&dummy1));
-  EXPECT_EQ(dummy.get(), dummy1.get());
-  EXPECT_EQ(3, dummy.use_count());
-
-  std::shared_ptr<Dummy2> dummy2;
-  EXPECT_FALSE(var.Get(&dummy2));
+  std::shared_ptr<double> d;
+  EXPECT_FALSE(var.Get(&d));
 }

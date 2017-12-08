@@ -1,81 +1,50 @@
 #include "calc/calc_lexer.h"
 
-CalcLexer::CalcLexer() {
-}
-
-CalcLexer::~CalcLexer() {
-}
-
-bool CalcLexer::GetToken(const std::string& input,
-                         int index,
-                         int* type,
-                         std::string* value,
-                         int* count,
-                         std::string* error) const {
-  const char& c = input[index];
-
-  if (IsDigit(c))
-    return GetNumberToken(input, index, type, value, count, error);
+StatusOr<std::unique_ptr<Token>> CalcLexer::GetToken(
+    const char* input, int line, int column) const {
+  char c = *input;
+  if (IsDigit(*input)) {
+    return GetNumberToken(input, line, column);
+  }
 
   int t = -1;
-  if (c == '*')
+  if (c == '*') {
     t = TYPE_ASTERISK;
-  else if (c == '(')
+  } else if (c == '(') {
     t = TYPE_LEFT_PARENTHESIS;
-  else if (c == '-')
+  } else if (c == '-') {
     t = TYPE_MINUS;
-  else if (c == '+')
+  } else if (c == '+') {
     t = TYPE_PLUS;
-  else if (c == ')')
+  } else if (c == ')') {
     t = TYPE_RIGHT_PARENTHESIS;
-  else if (c == '/')
+  } else if (c == '/') {
     t = TYPE_SLASH;
+  }
 
   if (t != -1) {
-    *type = t;
-    *value = c;
-    *count = 1;
-    return true;
+    return std::unique_ptr<Token>(new Token(t, c, line, column));
   }
 
-  *error = std::string("Unrecognized token: %c") + c;
-  return false;
+  return UnexpectedCharacter(c, line, column);
 }
 
-bool CalcLexer::GetNumberToken(const std::string& input,
-                               int index,
-                               int* type,
-                               std::string* value,
-                               int* count,
-                               std::string* error) const {
-  const int length = input.length();
-  const int start = index;
+StatusOr<std::unique_ptr<Token>> CalcLexer::GetNumberToken(
+    const char* input, int line, int column) const {
+  const char* start = input;
 
-  if (input[index] == '0') {
-    ++index;
-    if (index < length && IsDigit(input[index])) {
-      *error = "Unexpected digit";
-      return false;
-    }
-  } else
-    for (; index < length && IsDigit(input[index]); ++index);
-
-  if (index < length && input[index] == '.') {
-    ++index;
-
-    if (index == length) {
-      *error = "Unexpected end of input";
-      return false;
-    } else if (!IsDigit(input[index])) {
-      *error = "Expecting digit";
-      return false;
-    }
-
-    for (; index < length && IsDigit(input[index]); ++index);
+  if (*input == '0') {
+    ++input;
+  } else {
+    for (; IsDigit(*input); ++input);
   }
 
-  *type = TYPE_NUMBER;
-  *value = input.substr(start, index - start);
-  *count = index - start;
-  return true;
+  if (*input == '.') {
+    ++input;
+    RETURN_IF_ERROR(ExpectDigit(*input, line, column));
+    for (; IsDigit(*input); ++input);
+  }
+
+  return std::unique_ptr<Token>(new Token(
+      TYPE_NUMBER, std::string(start, input - start), line, column));
 }

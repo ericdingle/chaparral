@@ -11,7 +11,7 @@ class Variant {
   explicit Variant(const std::shared_ptr<T>& value) : data_(new PointerData<T>(value)) {}
   Variant(const Variant&) = delete;
   Variant& operator=(const Variant&) = delete;
-  ~Variant();
+  ~Variant() = default;
 
   template <typename T>
   bool Get(T* out) const {
@@ -20,7 +20,6 @@ class Variant {
       *out = data->value();
       return true;
     }
-
     return false;
   }
 
@@ -31,17 +30,16 @@ class Variant {
       *out = data->value();
       return true;
     }
-
     return false;
   }
 
  private:
   class DataBase {
    public:
-    DataBase();
+    DataBase() = default;
     DataBase(const DataBase&) = delete;
     DataBase& operator=(const DataBase&) = delete;
-    virtual ~DataBase();
+    virtual ~DataBase() = default;
   };
 
   template <typename T>
@@ -50,12 +48,12 @@ class Variant {
     explicit Data(T t) : value_(t) {}
     Data(const Data&) = delete;
     Data& operator=(const Data&) = delete;
-    virtual ~Data() {}
+    ~Data() override = default;
 
     const T& value() const { return value_; }
 
    private:
-    T value_;
+    const T value_;
   };
 
   template <typename T>
@@ -64,12 +62,12 @@ class Variant {
     explicit PointerData(const std::shared_ptr<T> t) : value_(t) {}
     PointerData(const PointerData&) = delete;
     PointerData& operator=(const PointerData&) = delete;
-    virtual ~PointerData() {}
+    ~PointerData() override = default;
 
     const std::shared_ptr<T>& value() const { return value_; }
 
    private:
-    std::shared_ptr<T> value_;
+    const std::shared_ptr<T> value_;
   };
 
   std::unique_ptr<const DataBase> data_;
