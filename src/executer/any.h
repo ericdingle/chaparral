@@ -1,15 +1,15 @@
-#ifndef EXECUTER_VARIANT_H_
-#define EXECUTER_VARIANT_H_
+#ifndef EXECUTER_ANY_H_
+#define EXECUTER_ANY_H_
 
 #include <memory>
 
-class Variant {
+class Any {
  public:
   template <typename T>
-  explicit Variant(T value) : data_(new Data<T>(value)) {}
-  Variant(const Variant&) = delete;
-  Variant& operator=(const Variant&) = delete;
-  ~Variant() = default;
+  explicit Any(T value) : data_(new Data<T>(value)) {}
+  Any(const Any&) = delete;
+  Any& operator=(const Any&) = delete;
+  ~Any() = default;
 
   template <typename T>
   bool Get(T* out) const {
@@ -47,4 +47,4 @@ class Variant {
   std::unique_ptr<const DataBase> data_;
 };
 
-#endif  // EXECUTER_VARIANT_H_
+#endif  // EXECUTER_ANY_H_

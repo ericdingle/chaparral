@@ -1,6 +1,6 @@
 #include "executer/executer.h"
 #include "executer/executer_test_fixture.h"
-#include "executer/variant.h"
+#include "executer/any.h"
 #include "third_party/bonavista/src/lexer/lexer.h"
 #include "third_party/bonavista/src/parser/node.h"
 #include "third_party/bonavista/src/parser/parser.h"
@@ -41,13 +41,13 @@ class TestExecuter : public Executer {
   using Executer::ExecuteNodeT;
 
  protected:
-  StatusOr<std::shared_ptr<Variant>> ExecuteNode(const Node* node) override {
+  StatusOr<std::shared_ptr<Any>> ExecuteNode(const Node* node) override {
     int digit = node->token().value()[0] - 0x30;
     if (digit == 9) {
       return Status("No nines!", node->token().line(), node->token().column());
     }
 
-    return std::make_shared<Variant>(digit);
+    return std::make_shared<Any>(digit);
   }
 };
 
@@ -64,7 +64,7 @@ TEST_F(ExecuterTest, BadToken) {
 }
 
 TEST_F(ExecuterTest, Execute) {
-  std::shared_ptr<Variant> v = Execute("5").value();
+  std::shared_ptr<Any> v = Execute("5").value();
   int i = 0;
   EXPECT_TRUE(v->Get(&i));
   EXPECT_EQ(5, i);

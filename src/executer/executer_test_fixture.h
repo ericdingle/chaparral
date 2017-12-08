@@ -2,7 +2,7 @@
 #define EXECUTER_EXECUTER_TEST_FIXTURE_H_
 
 #include <memory>
-#include "executer/variant.h"
+#include "executer/any.h"
 #include "third_party/bonavista/src/lexer/token_stream.h"
 #include "third_party/bonavista/src/util/status_or.h"
 #include "third_party/googletest/googletest/include/gtest/gtest.h"
@@ -10,7 +10,7 @@
 template <typename LexerT, typename ParserT, typename ExecuterT>
 class ExecuterTestFixture : public testing::Test {
  protected:
-  StatusOr<std::shared_ptr<Variant>> Execute(const char* input) const {
+  StatusOr<std::shared_ptr<Any>> Execute(const char* input) const {
     LexerT lexer;
     TokenStream stream(&lexer, input);
     ParserT parser(&stream);
@@ -18,7 +18,7 @@ class ExecuterTestFixture : public testing::Test {
     return executer.Execute();
   }
 
-  StatusOr<std::shared_ptr<Variant>> ExecuteAll(const char* input) const {
+  StatusOr<std::shared_ptr<Any>> ExecuteAll(const char* input) const {
     LexerT lexer;
     TokenStream stream(&lexer, input);
     ParserT parser(&stream);
