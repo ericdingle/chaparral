@@ -1,6 +1,7 @@
+#include "executer/any.h"
+#include "executer/any_test_macros.h"
 #include "executer/executer.h"
 #include "executer/executer_test_fixture.h"
-#include "executer/any.h"
 #include "third_party/bonavista/src/lexer/lexer.h"
 #include "third_party/bonavista/src/parser/node.h"
 #include "third_party/bonavista/src/parser/parser.h"
@@ -64,10 +65,7 @@ TEST_F(ExecuterTest, BadToken) {
 }
 
 TEST_F(ExecuterTest, Execute) {
-  std::shared_ptr<Any> v = Execute("5").value();
-  int i = 0;
-  EXPECT_TRUE(v->Get(&i));
-  EXPECT_EQ(5, i);
+  EXPECT_ANY(Execute("5").value(), int, 5);
 }
 
 TEST_F(ExecuterTest, ExecuteError) {

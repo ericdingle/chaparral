@@ -10,21 +10,26 @@
 template <typename LexerT, typename ParserT, typename ExecuterT>
 class ExecuterTestFixture : public testing::Test {
  protected:
-  StatusOr<std::shared_ptr<Any>> Execute(const char* input) const {
-    LexerT lexer;
-    TokenStream stream(&lexer, input);
-    ParserT parser(&stream);
-    ExecuterT executer(&parser);
-    return executer.Execute();
+  void Init(const char* input) {
+    stream_.reset(new TokenStream(&lexer_, input));
+    parser_.reset(new ParserT(stream_.get()));
+    executer_.reset(new ExecuterT(parser_.get()));
   }
 
-  StatusOr<std::shared_ptr<Any>> ExecuteAll(const char* input) const {
-    LexerT lexer;
-    TokenStream stream(&lexer, input);
-    ParserT parser(&stream);
-    ExecuterT executer(&parser);
-    return executer.ExecuteAll();
+  StatusOr<std::shared_ptr<Any>> Execute(const char* input) {
+    Init(input);
+    return executer_->Execute();
   }
+
+  StatusOr<std::shared_ptr<Any>> ExecuteAll(const char* input) {
+    Init(input);
+    return executer_->ExecuteAll();
+  }
+
+  LexerT lexer_;
+  std::unique_ptr<TokenStream> stream_;
+  std::unique_ptr<ParserT> parser_;
+  std::unique_ptr<ExecuterT> executer_;
 };
 
 #endif  // EXECUTER_EXECUTER_TEST_FIXTURE_H_
