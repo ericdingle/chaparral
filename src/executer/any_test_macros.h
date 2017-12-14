@@ -3,9 +3,9 @@
 
 #define EXPECT_ANY(expr, T, value) \
   do {                             \
-    auto any = (expr);             \
+    const Any _any = (expr);       \
     T t;                           \
-    EXPECT_TRUE(any->Get(&t));     \
+    EXPECT_TRUE(_any.Get(&t));     \
     EXPECT_EQ(value, t);           \
   } while(false)
 

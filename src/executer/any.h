@@ -5,10 +5,14 @@
 
 class Any {
  public:
+  Any() = default;
   template <typename T>
   explicit Any(T value) : data_(new Data<T>(value)) {}
+
   Any(const Any&) = delete;
+  Any(Any&&) = default;
   Any& operator=(const Any&) = delete;
+
   ~Any() = default;
 
   template <typename T>

@@ -11,7 +11,7 @@ class CalcExecuter : public Executer {
   ~CalcExecuter() override = default;
 
  protected:
-  StatusOr<std::shared_ptr<Any>> ExecuteNode(const Node* node);
+  StatusOr<Any> ExecuteNode(const Node* node);
 };
 
 #endif  // CALC_CALC_EXECUTER_H_

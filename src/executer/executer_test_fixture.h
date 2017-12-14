@@ -16,12 +16,12 @@ class ExecuterTestFixture : public testing::Test {
     executer_.reset(new ExecuterT(parser_.get()));
   }
 
-  StatusOr<std::shared_ptr<Any>> Execute(const char* input) {
+  StatusOr<Any> Execute(const char* input) {
     Init(input);
     return executer_->Execute();
   }
 
-  StatusOr<std::shared_ptr<Any>> ExecuteAll(const char* input) {
+  StatusOr<Any> ExecuteAll(const char* input) {
     Init(input);
     return executer_->ExecuteAll();
   }

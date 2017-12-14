@@ -36,7 +36,7 @@ int main() {
     }
 
     double result = 0;
-    assert(status_or.value()->Get(&result));
+    assert(status_or.value().Get(&result));
     printf("%f\n", result);
   }
 

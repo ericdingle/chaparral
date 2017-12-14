@@ -6,7 +6,7 @@
 Executer::Executer(Parser* parser) : parser_(parser) {
 }
 
-StatusOr<std::shared_ptr<Any>> Executer::Execute() {
+StatusOr<Any> Executer::Execute() {
   ASSIGN_OR_RETURN(std::unique_ptr<Node> node, parser_->Parse());
   assert(node);
   return ExecuteNode(node.get());
@@ -14,7 +14,7 @@ StatusOr<std::shared_ptr<Any>> Executer::Execute() {
 
 Status Executer::ExecuteAll() {
   while (HasInput()) {
-    ASSIGN_OR_RETURN(std::shared_ptr<Any> a, Execute());
+    ASSIGN_OR_RETURN(const Any any, Execute());
   }
   return Status();
 }

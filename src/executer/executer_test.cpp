@@ -42,13 +42,13 @@ class TestExecuter : public Executer {
   using Executer::ExecuteNodeT;
 
  protected:
-  StatusOr<std::shared_ptr<Any>> ExecuteNode(const Node* node) override {
+  StatusOr<Any> ExecuteNode(const Node* node) override {
     int digit = node->token().value()[0] - 0x30;
     if (digit == 9) {
       return Status("No nines!", node->token().line(), node->token().column());
     }
 
-    return std::make_shared<Any>(digit);
+    return Any(digit);
   }
 };
 

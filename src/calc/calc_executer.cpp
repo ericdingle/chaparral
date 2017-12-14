@@ -2,7 +2,7 @@
 
 #include "calc/calc_lexer.h"
 
-StatusOr<std::shared_ptr<Any>> CalcExecuter::ExecuteNode(const Node* node) {
+StatusOr<Any> CalcExecuter::ExecuteNode(const Node* node) {
   if (node->token().IsType(CalcLexer::TYPE_ASTERISK) ||
       node->token().IsType(CalcLexer::TYPE_MINUS) ||
       node->token().IsType(CalcLexer::TYPE_PLUS) ||
@@ -21,12 +21,12 @@ StatusOr<std::shared_ptr<Any>> CalcExecuter::ExecuteNode(const Node* node) {
       result = left / right;
     }
 
-    return std::make_shared<Any>(result);
+    return Any(result);
   }
 
   if (node->token().IsType(CalcLexer::TYPE_NUMBER)) {
     double value = atof(node->token().value().c_str());
-    return std::make_shared<Any>(value);
+    return Any(value);
   }
 
   return Status("WTF!", 1, 1);
