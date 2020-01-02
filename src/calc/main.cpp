@@ -22,7 +22,7 @@ int main() {
     if (input.empty())
       break;
 
-    TokenStream stream(&lexer, input);
+    TokenStream stream(lexer, input);
     CalcParser parser(&stream);
     CalcExecuter executer(&parser);
 

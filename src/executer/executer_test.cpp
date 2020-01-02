@@ -15,13 +15,12 @@ class TestLexer : public Lexer {
   };
 
   StatusOr<std::unique_ptr<Token>> GetToken(
-      const char* input, int line, int column) const override {
-    if (IsDigit(*input)) {
-      return std::unique_ptr<Token>(new Token(TYPE_DIGIT, std::string(1, *input),
-                                              line, column));
+      std::string_view input, int line, int column) const override {
+    if (IsDigit(input[0])) {
+      return std::make_unique<Token>(TYPE_DIGIT, input.substr(0, 1), line, column);
     }
 
-    return UnexpectedCharacter(*input, line, column);
+    return UnexpectedCharacter(input[0], line, column);
   }
 };
 
@@ -32,7 +31,7 @@ class TestParser : public Parser {
  protected:
   StatusOr<std::unique_ptr<Node>> ParsePrefixToken(
       std::unique_ptr<const Token> token) override {
-    return std::unique_ptr<Node>(new Node(std::move(token)));
+    return std::make_unique<Node>(std::move(token));
   }
 };
 
@@ -83,7 +82,7 @@ TEST_F(ExecuterTest, ExecuteAllError) {
 TEST_F(ExecuterTest, ExecuteNodeT) {
   TestExecuter executer(nullptr);
 
-  Node node(std::unique_ptr<Token>(new Token(TestLexer::TYPE_DIGIT, "1", 1, 1)));
+  Node node(std::make_unique<Token>(TestLexer::TYPE_DIGIT, "1", 1, 1));
   EXPECT_EQ(1, executer.ExecuteNodeT<int>(&node).value());
 
   EXPECT_STATUS(executer.ExecuteNodeT<double>(&node).status(),

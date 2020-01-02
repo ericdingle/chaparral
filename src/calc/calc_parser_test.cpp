@@ -52,7 +52,7 @@ TEST_F(CalcParserTest, ParseOperator) {
 
     auto node = Parse(input.c_str()).value();
     EXPECT_TOKEN(node->token(), test_case.second, test_case.first, 1, 2);
-    EXPECT_EQ(2, node->children().size());
+    EXPECT_EQ(2U, node->children().size());
 
     const auto& children = node->children();
     EXPECT_TOKEN(children[0]->token(), CalcLexer::TYPE_NUMBER, "1", 1, 1);

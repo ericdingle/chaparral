@@ -1,10 +1,10 @@
 #include "calc/calc_lexer.h"
 
 StatusOr<std::unique_ptr<Token>> CalcLexer::GetToken(
-    const char* input, int line, int column) const {
-  char c = *input;
-  if (IsDigit(*input)) {
-    return GetNumberToken(input, line, column);
+    std::string_view input, int line, int column) const {
+  char c = input[0];
+  if (IsDigit(c)) {
+    return GetNumberToken(input.data(), line, column);
   }
 
   int t = -1;
@@ -23,7 +23,7 @@ StatusOr<std::unique_ptr<Token>> CalcLexer::GetToken(
   }
 
   if (t != -1) {
-    return std::unique_ptr<Token>(new Token(t, c, line, column));
+    return std::make_unique<Token>(t, input.substr(0, 1), line, column);
   }
 
   return UnexpectedCharacter(c, line, column);
@@ -45,6 +45,6 @@ StatusOr<std::unique_ptr<Token>> CalcLexer::GetNumberToken(
     for (; IsDigit(*input); ++input);
   }
 
-  return std::unique_ptr<Token>(new Token(
-      TYPE_NUMBER, std::string(start, input - start), line, column));
+  return std::make_unique<Token>(
+      TYPE_NUMBER, std::string_view(start, input - start), line, column);
 }

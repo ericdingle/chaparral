@@ -33,7 +33,7 @@ StatusOr<std::unique_ptr<Node>> CalcParser::ParsePrefixToken(
   }
 
   if (token->IsType(CalcLexer::TYPE_NUMBER)) {
-    return std::unique_ptr<Node>(new Node(std::move(token)));
+    return std::make_unique<Node>(std::move(token));
   }
 
   return UnexpectedToken(*token);
@@ -45,7 +45,7 @@ StatusOr<std::unique_ptr<Node>> CalcParser::ParseInfixToken(
       token->IsType(CalcLexer::TYPE_MINUS) ||
       token->IsType(CalcLexer::TYPE_PLUS) ||
       token->IsType(CalcLexer::TYPE_SLASH)) {
-    std::unique_ptr<Node> node(new Node(std::move(token)));
+    auto node = std::make_unique<Node>(std::move(token));
     node->AddChild(std::move(left));
 
     ASSIGN_OR_RETURN(auto right,

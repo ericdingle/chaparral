@@ -10,18 +10,18 @@
 template <typename LexerT, typename ParserT, typename ExecuterT>
 class ExecuterTestFixture : public testing::Test {
  protected:
-  void Init(const char* input) {
-    stream_.reset(new TokenStream(&lexer_, input));
+  void Init(std::string_view input) {
+    stream_.reset(new TokenStream(lexer_, input));
     parser_.reset(new ParserT(stream_.get()));
     executer_.reset(new ExecuterT(parser_.get()));
   }
 
-  StatusOr<Any> Execute(const char* input) {
+  StatusOr<Any> Execute(std::string_view input) {
     Init(input);
     return executer_->Execute();
   }
 
-  StatusOr<Any> ExecuteAll(const char* input) {
+  StatusOr<Any> ExecuteAll(std::string_view input) {
     Init(input);
     return executer_->ExecuteAll();
   }

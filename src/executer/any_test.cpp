@@ -49,7 +49,7 @@ TEST(AnyTest, Get) {
 }
 
 TEST(AnyTest, GetSharedPtr) {
-  std::shared_ptr<int> i(new int(5));
+  auto i = std::make_shared<int>(5);
   EXPECT_EQ(1, i.use_count());
 
   Any any(i);

@@ -25,7 +25,7 @@ StatusOr<Any> CalcExecuter::ExecuteNode(const Node* node) {
   }
 
   if (node->token().IsType(CalcLexer::TYPE_NUMBER)) {
-    double value = atof(node->token().value().c_str());
+    double value = strtod(node->token().value().data(), nullptr);
     return Any(value);
   }
 
