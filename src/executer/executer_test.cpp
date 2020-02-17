@@ -39,10 +39,10 @@ class TestExecuter : public Executer {
   using Executer::ExecuteNodeT;
 
  protected:
-  StatusOr<std::any> ExecuteNode(const Node* node) override {
-    int digit = node->token().value()[0] - 0x30;
+  StatusOr<std::any> ExecuteNode(const Node& node) override {
+    int digit = node.token().value()[0] - 0x30;
     if (digit == 9) {
-      return Status("No nines!", node->token().line(), node->token().column());
+      return Status("No nines!", node.token().line(), node.token().column());
     }
 
     return std::make_any<int>(digit);
@@ -81,8 +81,8 @@ TEST_F(ExecuterTest, ExecuteNodeT) {
   TestExecuter executer(nullptr);
 
   Node node(std::make_unique<Token>(TestLexer::TYPE_DIGIT, "1", 1, 1));
-  EXPECT_EQ(1, executer.ExecuteNodeT<int>(&node).value());
+  EXPECT_EQ(1, executer.ExecuteNodeT<int>(node).value());
 
-  EXPECT_STATUS(executer.ExecuteNodeT<double>(&node).status(),
+  EXPECT_STATUS(executer.ExecuteNodeT<double>(node).status(),
                 "Expected type: d", 1, 1);
 }

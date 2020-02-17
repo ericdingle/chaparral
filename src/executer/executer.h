@@ -19,21 +19,21 @@ class Executer {
   bool HasInput() const;
 
  protected:
-  virtual StatusOr<std::any> ExecuteNode(const Node* node) = 0;
+  virtual StatusOr<std::any> ExecuteNode(const Node& node) = 0;
   template <typename T>
-  StatusOr<T> ExecuteNodeT(const Node* node);
+  StatusOr<T> ExecuteNodeT(const Node& node);
 
  private:
   Parser* parser_;
 };
 
 template <typename T>
-StatusOr<T> Executer::ExecuteNodeT(const Node* node) {
+StatusOr<T> Executer::ExecuteNodeT(const Node& node) {
   ASSIGN_OR_RETURN(const std::any any, ExecuteNode(node));
 
   if (any.type() != typeid(T)) {
     return Status(std::string("Expected type: ") + typeid(T).name(),
-                  node->token().line(), node->token().column());
+                  node.token().line(), node.token().column());
   }
 
   return std::any_cast<T>(any);

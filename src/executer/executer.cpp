@@ -9,7 +9,7 @@ Executer::Executer(Parser* parser) : parser_(parser) {
 StatusOr<std::any> Executer::Execute() {
   ASSIGN_OR_RETURN(std::unique_ptr<Node> node, parser_->Parse());
   assert(node);
-  return ExecuteNode(node.get());
+  return ExecuteNode(*node);
 }
 
 Status Executer::ExecuteAll() {
