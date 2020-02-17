@@ -1,7 +1,6 @@
 #include "calc/calc_executer.h"
 #include "calc/calc_lexer.h"
 #include "calc/calc_parser.h"
-#include "executer/any_test_macros.h"
 #include "executer/executer_test_fixture.h"
 #include "third_party/bonavista/src/util/status_test_macros.h"
 
@@ -17,7 +16,7 @@ TEST_F(CalcExecuterTest, ExecuteUnknown) {
 }
 
 TEST_F(CalcExecuterTest, ExecuteNumber) {
-  EXPECT_ANY(Execute("1").value(), double, 1.0);
+  EXPECT_EQ(1.0, std::any_cast<double>(Execute("1").value()));
 }
 
 TEST_F(CalcExecuterTest, ExecuteOperator) {
@@ -30,6 +29,6 @@ TEST_F(CalcExecuterTest, ExecuteOperator) {
 
   for (const auto& test_case : test_cases) {
     std::string input = std::string("3") + test_case.first + "3";
-    EXPECT_ANY(Execute(input.c_str()).value(), double, test_case.second);
+    EXPECT_EQ(test_case.second, std::any_cast<double>(Execute(input).value()));
   }
 }

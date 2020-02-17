@@ -1,7 +1,7 @@
 #ifndef EXECUTER_EXECUTER_H_
 #define EXECUTER_EXECUTER_H_
 
-#include "executer/any.h"
+#include <any>
 #include "third_party/bonavista/src/parser/node.h"
 #include "third_party/bonavista/src/parser/parser.h"
 #include "third_party/bonavista/src/util/status_or.h"
@@ -13,13 +13,13 @@ class Executer {
   Executer& operator=(const Executer&) = delete;
   virtual ~Executer() = default;
 
-  StatusOr<Any> Execute();
+  StatusOr<std::any> Execute();
   Status ExecuteAll();
 
   bool HasInput() const;
 
  protected:
-  virtual StatusOr<Any> ExecuteNode(const Node* node) = 0;
+  virtual StatusOr<std::any> ExecuteNode(const Node* node) = 0;
   template <typename T>
   StatusOr<T> ExecuteNodeT(const Node* node);
 
@@ -29,14 +29,14 @@ class Executer {
 
 template <typename T>
 StatusOr<T> Executer::ExecuteNodeT(const Node* node) {
-  ASSIGN_OR_RETURN(const Any any, ExecuteNode(node));
+  ASSIGN_OR_RETURN(const std::any any, ExecuteNode(node));
 
-  T t;
-  if (!any.Get(&t)) {
-    return Status(std::string("Expected type: ") + typeid(t).name(),
+  if (any.type() != typeid(T)) {
+    return Status(std::string("Expected type: ") + typeid(T).name(),
                   node->token().line(), node->token().column());
   }
-  return t;
+
+  return std::any_cast<T>(any);
 }
 
 #endif  // EXECUTER_EXECUTER_H_

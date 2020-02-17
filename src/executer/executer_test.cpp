@@ -1,5 +1,3 @@
-#include "executer/any.h"
-#include "executer/any_test_macros.h"
 #include "executer/executer.h"
 #include "executer/executer_test_fixture.h"
 #include "third_party/bonavista/src/lexer/lexer.h"
@@ -41,13 +39,13 @@ class TestExecuter : public Executer {
   using Executer::ExecuteNodeT;
 
  protected:
-  StatusOr<Any> ExecuteNode(const Node* node) override {
+  StatusOr<std::any> ExecuteNode(const Node* node) override {
     int digit = node->token().value()[0] - 0x30;
     if (digit == 9) {
       return Status("No nines!", node->token().line(), node->token().column());
     }
 
-    return Any(digit);
+    return std::make_any<int>(digit);
   }
 };
 
@@ -64,7 +62,7 @@ TEST_F(ExecuterTest, BadToken) {
 }
 
 TEST_F(ExecuterTest, Execute) {
-  EXPECT_ANY(Execute("5").value(), int, 5);
+  EXPECT_EQ(5, std::any_cast<int>(Execute("5").value()));
 }
 
 TEST_F(ExecuterTest, ExecuteError) {
