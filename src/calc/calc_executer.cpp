@@ -21,12 +21,12 @@ StatusOr<std::any> CalcExecuter::ExecuteNode(const Node& node) {
       result = left / right;
     }
 
-    return std::make_any<double>(result);
+    return std::any(result);
   }
 
   if (node.token().IsType(CalcLexer::TYPE_NUMBER)) {
     double value = strtod(node.token().value().data(), nullptr);
-    return std::make_any<double>(value);
+    return std::any(value);
   }
 
   return Status("WTF!", 1, 1);

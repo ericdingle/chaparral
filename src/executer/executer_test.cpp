@@ -45,7 +45,7 @@ class TestExecuter : public Executer {
       return Status("No nines!", node.token().line(), node.token().column());
     }
 
-    return std::make_any<int>(digit);
+    return std::any(digit);
   }
 };
 
