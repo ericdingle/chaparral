@@ -1,6 +1,6 @@
 # chaparral
 
-An interpreter library written in C++.
+Implementation of Lox Lexer/Parser/Interpreter by following "Crafting Interpreters".
 
 ## Build steps.
 
